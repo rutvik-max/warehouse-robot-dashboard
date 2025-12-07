@@ -4,7 +4,7 @@ A simulation-based web dashboard for monitoring warehouse robots, their tasks, a
 Includes Bot Status, Dashboard, Task Allocation, Task Queue, Analytics, optional Map Page, and optional 3D visualization.
 
 ---
-
+Demo Link: https://drive.google.com/file/d/1-M9gOMoQVJKY6ST8qVr2c_veAuCD2lFR/view?usp=sharing
 # 🚀 **How to Run the Project**
 
 ### **Prerequisites**
