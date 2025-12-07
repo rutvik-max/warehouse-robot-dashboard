@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Simulation Admin — Dashboard</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <!-- Tailwind CDN (for dev/admin UI only) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* tiny utility for the sparkline svg */
+    .sparkline { width: 96px; height: 28px; display:block; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <div class="max-w-7xl mx-auto p-6">
+    <header class="flex items-center justify-between gap-4 mb-6">
+      <div>
+        <h1 class="text-2xl font-semibold">Simulation Admin</h1>
+        <p class="text-sm text-slate-500 mt-1">Live controls & state for the warehouse robots simulation</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="btn-refresh" class="px-3 py-2 rounded bg-indigo-600 text-white text-sm shadow">Refresh</button>
+        <a href="/" class="text-sm text-slate-600 hover:text-slate-900">Open frontend</a>
+      </div>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Controls card -->
+      <div class="lg:col-span-1 bg-white rounded-lg p-4 shadow-sm border">
+        <h2 class="text-sm font-medium text-slate-700">Controls</h2>
+
+        <div class="mt-3 space-y-3">
+          <div class="flex items-center gap-2">
+            <button id="btn-toggle" class="flex-1 px-3 py-2 rounded bg-red-500 text-white text-sm">Stop</button>
+            <div id="conn" class="text-sm text-slate-500">Connecting…</div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <input id="interval-ms" type="number" value="10000" class="w-full rounded border px-3 py-2 text-sm" />
+            <button id="btn-set-interval" class="px-3 py-2 rounded bg-indigo-600 text-white text-sm">Set interval</button>
+          </div>
+
+          <div class="pt-2">
+            <div class="text-xs text-slate-500 mb-2">Inject task</div>
+            <div class="grid grid-cols-1 gap-2">
+              <div class="flex gap-2">
+                <select id="task-type" class="flex-1 rounded border px-2 py-1 text-sm">
+                  <option value="pickup">pickup</option>
+                  <option value="drop">drop</option>
+                  <option value="move">move</option>
+                </select>
+                <select id="task-priority" class="w-28 rounded border px-2 py-1 text-sm">
+                  <option value="low">low</option>
+                  <option value="medium">medium</option>
+                  <option value="high">high</option>
+                </select>
+              </div>
+              <input id="task-from" placeholder="From (zone)" class="rounded border px-2 py-1 text-sm" />
+              <input id="task-to" placeholder="To (zone)" class="rounded border px-2 py-1 text-sm" />
+              <div class="flex gap-2">
+                <button id="btn-add-task" class="px-3 py-2 rounded bg-emerald-600 text-white text-sm flex-1">Add Task</button>
+                <button id="btn-clear" class="px-3 py-2 rounded border text-sm">Clear</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-3 text-xs text-slate-500">
+            <div>Server admin endpoints:</div>
+            <div class="mt-1 text-xs text-slate-400">/admin/state • /admin/toggle • /admin/interval • /admin/addTask</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bots card -->
+      <div class="lg:col-span-2 bg-white rounded-lg p-4 shadow-sm border">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm font-medium text-slate-700">Bots</h2>
+          <div class="text-xs text-slate-500">Realtime status & battery sparkline</div>
+        </div>
+
+        <div id="bots-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Rows inserted here -->
+        </div>
+      </div>
+
+      <!-- Tasks / Live JSON -->
+      <div class="lg:col-span-3 bg-white rounded-lg p-4 shadow-sm border">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm font-medium text-slate-700">Tasks & Live State</h2>
+          <div class="text-xs text-slate-500">Pending tasks below — click Refresh if needed</div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div class="lg:col-span-2">
+            <ul id="tasks-list" class="space-y-2">
+              <!-- tasks here -->
+            </ul>
+          </div>
+          <div class="lg:col-span-1">
+            <div class="text-xs text-slate-500 mb-2">Raw state JSON</div>
+            <pre id="state" class="text-xs bg-slate-50 p-3 rounded h-48 overflow-auto"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    // admin UI client script
+    const socket = io();
+
+    const connEl = document.getElementById('conn');
+    const stateEl = document.getElementById('state');
+    const btnRefresh = document.getElementById('btn-refresh');
+    const btnToggle = document.getElementById('btn-toggle');
+    const btnSetInterval = document.getElementById('btn-set-interval');
+    const btnAddTask = document.getElementById('btn-add-task');
+    const btnClear = document.getElementById('btn-clear');
+
+    const intervalInput = document.getElementById('interval-ms');
+    const taskType = document.getElementById('task-type');
+    const taskPriority = document.getElementById('task-priority');
+    const taskFrom = document.getElementById('task-from');
+    const taskTo = document.getElementById('task-to');
+
+    const botsGrid = document.getElementById('bots-grid');
+    const tasksList = document.getElementById('tasks-list');
+
+    // keep a small battery history per bot for sparklines (last N samples)
+    const BATTERY_HISTORY_LEN = 20;
+    const batteryHistory = {}; // botId -> number[]
+
+    let running = true;
+
+    function ensureHistory(bot) {
+      if (!batteryHistory[bot.id]) {
+        batteryHistory[bot.id] = Array(Math.min(BATTERY_HISTORY_LEN, 3)).fill(bot.battery || 0);
+      } else {
+        const arr = batteryHistory[bot.id];
+        arr.push(bot.battery || 0);
+        while (arr.length > BATTERY_HISTORY_LEN) arr.shift();
+      }
+    }
+
+    function renderSparkline(values) {
+      // values: array of numbers 0..100
+      const w = 96, h = 28, pad = 2;
+      const max = 100;
+      if (!values || values.length === 0) {
+        return `<svg class="sparkline" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg"></svg>`;
+      }
+      const step = (w - pad*2) / Math.max(1, values.length - 1);
+      const points = values.map((v, i) => {
+        const x = pad + i * step;
+        const y = pad + (1 - v / max) * (h - pad*2);
+        return `${x},${y}`;
+      }).join(' ');
+      const last = values[values.length - 1];
+      const stroke = last > 60 ? '#10B981' : (last > 30 ? '#F59E0B' : '#EF4444');
+      return `<svg class="sparkline" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+        <polyline fill="none" stroke="${stroke}" stroke-width="2" points="${points}" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>`;
+    }
+
+    function badgeForStatus(status) {
+      if (status === 'idle') return '<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-xs">idle</span>';
+      if (status === 'busy') return '<span class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 text-xs">busy</span>';
+      if (status === 'charging') return '<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-xs">charging</span>';
+      return '<span class="px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-xs">error</span>';
+    }
+
+    function renderBotCard(bot) {
+      ensureHistory(bot);
+      const history = batteryHistory[bot.id] || [bot.battery || 0];
+      const spark = renderSparkline(history);
+      const battery = bot.battery ?? 0;
+      const batteryColor = battery > 60 ? 'bg-emerald-400' : (battery > 30 ? 'bg-amber-400' : 'bg-red-400');
+      return `
+      <div class="p-3 border rounded-lg bg-white shadow-sm">
+        <div class="flex items-start justify-between gap-2">
+          <div>
+            <div class="text-sm font-semibold">${bot.name}</div>
+            <div class="text-xs text-slate-400">ID: ${bot.id}</div>
+            <div class="mt-2 text-xs">${badgeForStatus(bot.status)} <span class="ml-2 text-xs text-slate-500"> ${bot.speed.toFixed(2)} u/s</span></div>
+          </div>
+          <div class="text-right">
+            <div class="text-xs text-slate-400">Last</div>
+            <div class="text-sm text-slate-700">${relativeTime(bot.lastUpdated)}</div>
+            <div class="text-xs text-slate-400 mt-1">Pos</div>
+            <div class="text-sm text-slate-700">${Math.round(bot.x||0)}, ${Math.round(bot.y||0)}</div>
+          </div>
+        </div>
+
+        <div class="mt-3">
+          <div class="flex items-center justify-between">
+            <div class="text-xs text-slate-500">Battery</div>
+            <div class="text-sm font-medium">${battery}%</div>
+          </div>
+          <div class="w-full h-2 bg-slate-100 rounded mt-1 overflow-hidden">
+            <div class="${batteryColor}" style="width:${battery}%"></div>
+          </div>
+        </div>
+
+        <div class="mt-3">
+          ${spark}
+        </div>
+      </div>
+      `;
+    }
+
+    function relativeTime(ts) {
+      const diff = Date.now() - ts;
+      if (diff < 5_000) return 'just now';
+      if (diff < 60_000) return `${Math.floor(diff/1000)}s ago`;
+      if (diff < 3_600_000) return `${Math.floor(diff/60000)}m ago`;
+      return `${Math.floor(diff/3_600_000)}h ago`;
+    }
+
+    function renderTasks(tasks) {
+      if (!tasks || tasks.length === 0) {
+        return '<li class="p-3 bg-slate-50 rounded text-slate-500">No pending tasks</li>';
+      }
+      return tasks.map(t => `
+        <li class="p-3 bg-white border rounded flex items-start justify-between">
+          <div>
+            <div class="text-sm font-semibold">${t.type.toUpperCase()} • ${t.id}</div>
+            <div class="text-xs text-slate-500 mt-1">${t.from ? 'From: ' + t.from + ' ' : ''}${t.to ? '• To: ' + t.to : ''}</div>
+            ${t.comments ? `<div class="text-xs text-slate-400 mt-2">${t.comments}</div>` : ''}
+          </div>
+          <div class="text-right">
+            <div class="text-xs text-slate-400">Priority</div>
+            <div class="text-sm font-medium mt-1">${t.priority}</div>
+            <div class="text-xs text-slate-400 mt-2">${relativeTime(t.createdAt)}</div>
+          </div>
+        </li>
+      `).join('');
+    }
+
+    // socket handlers
+    socket.on('connect', () => {
+      connEl.textContent = 'connected: ' + socket.id;
+      btnToggle.textContent = 'Stop';
+      running = true;
+    });
+
+    socket.on('state', (payload) => {
+      // update raw JSON
+      try { stateEl.textContent = JSON.stringify(payload, null, 2); } catch(e){ stateEl.textContent = String(payload); }
+
+      // render bots
+      const bots = payload.bots || [];
+      // ensure battery history exists for each bot and push current battery
+      bots.forEach(b => ensureHistory(b));
+      // create html for bots
+      botsGrid.innerHTML = bots.map(b => renderBotCard(b)).join('');
+
+      // render tasks
+      const tasks = payload.tasks || [];
+      tasksList.innerHTML = renderTasks(tasks);
+    });
+
+    socket.on('disconnect', () => {
+      connEl.textContent = 'disconnected';
+      btnToggle.textContent = 'Start';
+      running = false;
+    });
+
+    // wire up controls
+    btnRefresh.onclick = async () => {
+      const r = await fetch('/admin/state');
+      const j = await r.json();
+      stateEl.textContent = JSON.stringify(j, null, 2);
+      // update panels
+      if (j.bots) { j.bots.forEach(b => ensureHistory(b)); botsGrid.innerHTML = j.bots.map(b => renderBotCard(b)).join(''); }
+      if (j.tasks) tasksList.innerHTML = renderTasks(j.tasks);
+    };
+
+    btnToggle.onclick = async () => {
+      const action = running ? 'stop' : 'start';
+      btnToggle.disabled = true;
+      const r = await fetch('/admin/toggle', {
+        method: 'POST',
+        headers: {'content-type': 'application/json'},
+        body: JSON.stringify({ action })
+      });
+      const j = await r.json().catch(() => ({}));
+      running = !running;
+      btnToggle.textContent = running ? 'Stop' : 'Start';
+      connEl.textContent = (j.running === false) ? 'simulation stopped' : (socket.id ? 'connected: ' + socket.id : 'connected');
+      btnToggle.disabled = false;
+    };
+
+    btnSetInterval.onclick = async () => {
+      const ms = Number(intervalInput.value || 10000);
+      if (isNaN(ms) || ms < 100) return alert('Enter ms >= 100');
+      btnSetInterval.disabled = true;
+      const r = await fetch('/admin/interval', {
+        method: 'POST',
+        headers: {'content-type': 'application/json'},
+        body: JSON.stringify({ ms })
+      });
+      const j = await r.json().catch(() => ({}));
+      connEl.textContent = 'interval set: ' + (j.intervalMs || ms) + 'ms';
+      btnSetInterval.disabled = false;
+    };
+
+    btnAddTask.onclick = async () => {
+      const payload = {
+        type: taskType.value,
+        priority: taskPriority.value,
+        from: taskFrom.value || undefined,
+        to: taskTo.value || undefined,
+        comments: 'added-from-admin',
+      };
+      btnAddTask.disabled = true;
+      const r = await fetch('/admin/addTask', {
+        method: 'POST',
+        headers: {'content-type': 'application/json'},
+        body: JSON.stringify(payload)
+      });
+      const j = await r.json().catch(() => ({}));
+      connEl.textContent = 'task added: ' + (j.id || 'ok');
+      btnAddTask.disabled = false;
+      // optional refresh
+      btnRefresh.click();
+    };
+
+    btnClear.onclick = () => {
+      taskFrom.value = ''; taskTo.value = '';
+    };
+
+    // initial fetch
+    (async () => {
+      const r = await fetch('/admin/state');
+      const j = await r.json().catch(() => null);
+      if (j) {
+        stateEl.textContent = JSON.stringify(j, null, 2);
+        if (j.bots) { j.bots.forEach(b => ensureHistory(b)); botsGrid.innerHTML = j.bots.map(b => renderBotCard(b)).join(''); }
+        if (j.tasks) tasksList.innerHTML = renderTasks(j.tasks);
+      }
+    })();
+  </script>
+</body>
+</html>

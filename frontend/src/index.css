@@ -1,0 +1,282 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import "tailwindcss";
+
+/* put global base styles in a base layer so @apply works */
+@layer base {
+  /* Use variables for background & text so palettes and dark mode work */
+  html, body {
+    background-color: rgb(var(--bg-rgb, 255 255 255));
+    color: var(--text-color, #0f172a);
+  }
+
+  body {
+    @apply min-h-screen antialiased;
+    font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+
+    /* preserve your rendering settings */
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    display: flex;
+    place-items: center;
+    min-width: 320px;
+    min-height: 100vh;
+  }
+
+  h1 {
+    font-size: 3.2em;
+    line-height: 1.1;
+  }
+
+  a {
+    font-weight: 500;
+    color: var(--accent, #646cff);
+    text-decoration: inherit;
+  }
+  a:hover {
+    color: color-mix(in srgb, var(--accent, #646cff) 90%, black 10%);
+  }
+
+  /* Buttons get subtle style but respect palette tokens */
+  button {
+    border-radius: 8px;
+    border: 1px solid transparent;
+    padding: 0.6em 1.2em;
+    font-size: 1em;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.25s, transform 0.12s, box-shadow 0.12s;
+    background: var(--button-bg, #1ae51a);
+    color: var(--button-foreground, #0b1220);
+  }
+  button:hover {
+    border-color: color-mix(in srgb, var(--accent, #646cff) 60%, black 40%);
+    transform: translateY(-1px);
+  }
+  button:active {
+    transform: translateY(0);
+  }
+  button:focus,
+  button:focus-visible {
+    outline: 4px auto -webkit-focus-ring-color;
+  }
+
+  /* Basic utility for card backgrounds using variable */
+  .bg-card {
+    background-color: rgb(var(--card-bg-rgb, 255 255 255));
+  }
+}
+
+/* -------------------------
+   Default root variables
+   (will be overridden by palette classes)
+   ------------------------- */
+:root {
+  /* General text & background defaults */
+  --bg-rgb: 255 255 255; /* white */
+  --card-bg-rgb: 255 255 255;
+  --text-color: #0f172a;
+  --accent: #4f46e5;
+
+  /* Palette tokens (fallback) */
+  --primary-from: #8b5cf6;
+  --primary-to: #4f46e5;
+  --battery-gradient: linear-gradient(90deg,#34D399,#10B981);
+  --sparkline-stroke: #10b981;
+  --card-glow: rgba(79,70,229,0.10);
+
+  /* Button defaults */
+  --button-bg: #1ae51a;
+  --button-foreground: #06111a;
+}
+
+/* -------------------------
+   Palette definitions
+   (applied to <html> with classes: theme-electric, theme-ocean, theme-sunset)
+   ------------------------- */
+
+/* ELECTRIC (default) */
+.theme-electric {
+  --accent: #4f46e5;
+  --primary-from: #8b5cf6;
+  --primary-to: #4f46e5;
+  --muted-rgb: 79 70 229;
+  --battery-gradient: linear-gradient(90deg,#34D399,#10B981);
+  --sparkline-stroke: #34D399;
+  --card-glow: rgba(79,70,229,0.10);
+
+  --bg-rgb: 247 250 252; /* slate-50 */
+  --card-bg-rgb: 255 255 255;
+  --text-color: #0f172a;
+
+  --button-bg: linear-gradient(90deg,var(--primary-from), var(--primary-to));
+  --button-foreground: #ffffff;
+}
+
+/* OCEAN */
+.theme-ocean {
+  --accent: #0ea5a4;
+  --primary-from: #06b6d4;
+  --primary-to: #0ea5a4;
+  --muted-rgb: 6 182 212;
+  --battery-gradient: linear-gradient(90deg,#06b6d4,#0ea5a4);
+  --sparkline-stroke: #06b6d4;
+  --card-glow: rgba(6,182,212,0.08);
+
+  --bg-rgb: 245 255 255;
+  --card-bg-rgb: 255 255 255;
+  --text-color: #083241;
+
+  --button-bg: linear-gradient(90deg,var(--primary-from), var(--primary-to));
+  --button-foreground: #042f2f;
+}
+
+/* SUNSET */
+.theme-sunset {
+  --accent: #fb7185;
+  --primary-from: #fb7185;
+  --primary-to: #f97316;
+  --muted-rgb: 251 113 133;
+  --battery-gradient: linear-gradient(90deg,#fb7185,#f97316);
+  --sparkline-stroke: #fb7185;
+  --card-glow: rgba(251,113,133,0.10);
+
+  --bg-rgb: 255 249 240;
+  --card-bg-rgb: 255 255 255;
+  --text-color: #2b1a17;
+
+  --button-bg: linear-gradient(90deg,var(--primary-from), var(--primary-to));
+  --button-foreground: #ffffff;
+}
+
+/* -------------------------
+   Dark mode overrides
+   (applied when <html> has .dark)
+   ------------------------- */
+.dark {
+  /* slightly darker background for dark theme */
+  --bg-rgb: 17 24 39; /* slate-900 rgb */
+  --card-bg-rgb: 17 24 39; /* keep cards dark by default */
+  --text-color: #e6eef8;
+
+  /* Button fallback in dark */
+  --button-foreground: #ffffff;
+}
+
+/* ensure that theme classes + dark can combine */
+.dark.theme-electric  { /* keep electric palette but dark bg */ }
+.dark.theme-ocean     { }
+.dark.theme-sunset    { }
+
+/* -------------------------
+   Additional component-level helpers
+   ------------------------- */
+
+/* subtle card shadow & glow that uses palette glow */
+.card-vibrant {
+  box-shadow: 0 10px 30px rgba(2,6,23,0.06);
+  transition: transform .18s ease, box-shadow .18s ease;
+  border-radius: 14px;
+  overflow: hidden;
+}
+.recharts-responsive-wrapper {
+  min-width: 0;
+  min-height: 0;
+}
+
+/* helpful utility to ensure flex children can shrink (if your Tailwind doesn't already include it) */
+.min-w-0 { min-width: 0 !important; }
+.min-h-0 { min-height: 0 !important; }
+/* glass effect for content blocks */
+.glass {
+  background: rgba(255,255,255,0.65);
+  backdrop-filter: blur(6px);
+}
+.dark .glass {
+  background: rgba(15,23,42,0.55);
+}
+
+/* accent underline style */
+.accent-underline {
+  background-image: linear-gradient(90deg, var(--primary-from), var(--primary-to));
+  background-size: 100% 2px;
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+}
+
+/* small utility for using card bg rgb variable */
+.bg-card {
+  background-color: rgb(var(--card-bg-rgb));
+}
+
+/* make text use the theme text color by default */
+.text-theme {
+  color: var(--text-color);
+}
+
+/* gradient header helper that components can use inline via style or class */
+.header-gradient {
+  background: linear-gradient(90deg, var(--primary-from), var(--primary-to));
+}
+
+/* battery gradient helper */
+.battery-gradient {
+  background: var(--battery-gradient);
+}
+
+/* sparkline stroke variable usage */
+.sparkline-stroke {
+  stroke: var(--sparkline-stroke);
+}
+
+/* small interactive chips */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .25rem .6rem;
+  border-radius: 9999px;
+  font-size: .75rem;
+  font-weight: 600;
+}
+
+/* small responsive tweaks */
+@media (max-width: 768px) {
+  h1 { font-size: 2.25rem; }
+  .card-vibrant { border-radius: 12px; }
+}
+
+/* -------------------------
+   Your previous custom styles (kept & adapted)
+   ------------------------- */
+
+/* anchor tweaks already above; keep small hover adjustments here */
+a { transition: color .12s ease; }
+
+/* if you relied on the older button green, keep a compatibility token */
+.button-legacy {
+  background: #1ae51a;
+  color: #06111a;
+}
+
+/* you had a media prefers-color-scheme block before — keep but rely on store
+   and html classes instead of automatic switching. If you still want to
+   respect system preference on first-load, the theme store reads prefers-color-scheme. */
+
+/* -------------------------
+   Small utilities for animations & transitions
+   ------------------------- */
+.fade {
+  transition: opacity .2s ease, transform .18s ease;
+}
+
+.scale-up {
+  transition: transform .12s ease;
+}
