@@ -1,71 +1,93 @@
-📦 Warehouse Robot Dashboard – Final Submission
+# 📦 **Warehouse Robot Dashboard – Final Submission**
 
 A simulation-based web dashboard for monitoring warehouse robots, their tasks, analytics, and map layout.
 Includes Bot Status, Dashboard, Task Allocation, Task Queue, Analytics, optional Map Page, and optional 3D visualization.
 
-🚀 How to Run the Project
-Prerequisites
+---
 
-Node.js 18+
+# 🚀 **How to Run the Project**
 
-npm or yarn
+### **Prerequisites**
 
-Git
+* Node.js **18+**
+* npm or yarn
+* Git
 
-1) Clone the repository
+---
+
+## **1) Clone the repository**
+
+```bash
 git clone https://github.com/YOUR_USERNAME/warehouse-robot-dashboard.git
 cd warehouse-robot-dashboard
+```
 
-2) Install frontend dependencies
+---
+
+## **2) Install frontend dependencies**
+
+```bash
 cd frontend
 npm install
+```
 
-3) Start the development server
+---
+
+## **3) Start the development server**
+
+```bash
 npm run dev
-
+```
 
 The frontend will start at:
 
+```
 http://localhost:5173
+```
 
-4) (Bonus) Run Next.js 3D Visualization (optional)
+---
 
-If you included the next-visual folder:
+## **4) (Bonus) Run Next.js 3D Visualization (optional)**
 
+If you included the `next-visual` folder:
+
+```bash
 cd next-visual
 npm install
 npm run dev
-
+```
 
 Open:
 
+```
 http://localhost:3000/three-map
+```
 
-🛠 Tech Stack
-Frontend
+---
 
-React (TypeScript)
+# 🛠 **Tech Stack**
 
-Tailwind CSS for styling
+### **Frontend**
 
-Zustand for state management
+* **React (TypeScript)**
+* **Tailwind CSS** for styling
+* **Zustand** for state management
+* **Framer Motion** for animations
+* **React Router** for page navigation
+* **Recharts** for analytics graphs
+* **SVG Rendering** for Map Page
+* **Vite** for fast builds
 
-Framer Motion for animations
+### **Bonus (Optional)**
 
-React Router for page navigation
+* **Next.js** + **Three.js** (`@react-three/fiber`, `@react-three/drei`)
+  Used to create a 3D robot movement visualization.
 
-Recharts for analytics graphs
+---
 
-SVG Rendering for Map Page
+# 🧱 **Component Architecture**
 
-Vite for fast builds
-
-Bonus (Optional)
-
-Next.js + Three.js (@react-three/fiber, @react-three/drei)
-Used to create a 3D robot movement visualization.
-
-🧱 Component Architecture
+```
 frontend/
 │
 ├── src/
@@ -99,198 +121,172 @@ frontend/
 │       └── globals.css
 │
 └── README.md
+```
 
-Key Components
+### **Key Components**
 
-BotCard – Displays bot health, battery, status, sparkline history, last update.
+* **BotCard** – Displays bot health, battery, status, sparkline history, last update.
+* **SvgMapViewer** – Upload an SVG map → render → overlay bots moving on it.
+* **StatCard** – Dashboard summary of metrics like total bots, errors, tasks.
+* **Task Form & Queue** – Assign tasks, auto-dequeue simulated tasks every 3 seconds.
+* **Theme Provider** – Handles dark/light modes and color palettes.
 
-SvgMapViewer – Upload an SVG map → render → overlay bots moving on it.
+---
 
-StatCard – Dashboard summary of metrics like total bots, errors, tasks.
+# 🔄 **Data Flow Explanation**
 
-Task Form & Queue – Assign tasks, auto-dequeue simulated tasks every 3 seconds.
+### **1) Mock API Layer**
 
-Theme Provider – Handles dark/light modes and color palettes.
+`mockApi.ts` simulates:
 
-🔄 Data Flow Explanation
-1) Mock API Layer
+* Robot telemetry
+* Battery drain
+* Speed changes
+* Status changes (idle, busy, charging, error)
+* Task creation & assignment
 
-mockApi.ts simulates:
+This allows the system to run **offline with no backend**.
 
-Robot telemetry
+---
 
-Battery drain
+### **2) Zustand Store (Central State Hub)**
 
-Speed changes
+`useDataStore.ts` holds:
 
-Status changes (idle, busy, charging, error)
+#### **State slices**
 
-Task creation & assignment
+* `bots[]`
+* `tasks[]`
+* `pendingTasks[]`
+* `loading`
+* `simulationInterval`
 
-This allows the system to run offline with no backend.
+#### **Actions**
 
-2) Zustand Store (Central State Hub)
-
-useDataStore.ts holds:
-
-State slices
-
-bots[]
-
-tasks[]
-
-pendingTasks[]
-
-loading
-
-simulationInterval
-
-Actions
-
-refreshBots()
-
-addTask()
-
-removeTask()
-
-assignTask()
-
-setSimInterval()
+* `refreshBots()`
+* `addTask()`
+* `removeTask()`
+* `assignTask()`
+* `setSimInterval()`
 
 The store simulates:
 
-Bot updates every 10 seconds
+* Bot updates every **10 seconds**
+* Task dequeue every **3 seconds**
 
-Task dequeue every 3 seconds
+---
 
-3) Components Subscribe to Slices
+### **3) Components Subscribe to Slices**
 
-Zustand uses selectors, so only the required parts re-render:
+Zustand uses *selectors*, so only the required parts re-render:
 
+```ts
 const bots = useDataStore(s => s.bots);
 const pending = useDataStore(s => s.pendingTasks);
-
+```
 
 Pages remain fast and never over-render.
 
-4) UI Rendering
+---
 
-BotStatusPage maps over bots[] → BotCard
+### **4) UI Rendering**
 
-TaskAllocationPage dispatches addTask()
+* **BotStatusPage** maps over `bots[]` → `BotCard`
+* **TaskAllocationPage** dispatches `addTask()`
+* **TaskQueuePage** auto-updates when `pendingTasks` changes
+* **Dashboard** listens to:
 
-TaskQueuePage auto-updates when pendingTasks changes
+  * `totalBots`
+  * `idleBots`
+  * `botsInError`
+  * `activeTasks`
+  * `pendingTasks`
 
-Dashboard listens to:
+---
 
-totalBots
+# 🧠 **State Management Reasoning**
 
-idleBots
+### ✔ **Why Zustand?**
 
-botsInError
+* Much simpler than Redux
+* Minimal boilerplate
+* React-friendly
+* Perfect for real-time simulation updates
+* Small bundle size
+* No context provider wrapper needed
+* Built-in shallow comparison for optimal renders
 
-activeTasks
+### ✔ **Why not Context API?**
 
-pendingTasks
+* Too many nested components
+* Frequent updates cause re-renders
+* Harder to structure simulation loop
 
-🧠 State Management Reasoning
-✔ Why Zustand?
+### ✔ **Why not Redux Toolkit?**
 
-Much simpler than Redux
+* Heavy for an assignment
+* Requires slicing, actions, reducers
+* More code, less clarity
+* Zustand is more suitable for fast prototyping
 
-Minimal boilerplate
+---
 
-React-friendly
+# 🎨 **Figma Link (Bonus)**
 
-Perfect for real-time simulation updates
+> Replace the link below with your real share URL:
 
-Small bundle size
-
-No context provider wrapper needed
-
-Built-in shallow comparison for optimal renders
-
-✔ Why not Context API?
-
-Too many nested components
-
-Frequent updates cause re-renders
-
-Harder to structure simulation loop
-
-✔ Why not Redux Toolkit?
-
-Heavy for an assignment
-
-Requires slicing, actions, reducers
-
-More code, less clarity
-
-Zustand is more suitable for fast prototyping
-
-🎨 Figma Link (Bonus)
-
-Replace the link below with your real share URL:
-
-👉 Figma Design:
-https://www.figma.com/file/YOUR_FIGMA_ID/warehouse-robot-dashboard
+👉 **Figma Design:**
+[https://www.figma.com/file/YOUR_FIGMA_ID/warehouse-robot-dashboard](https://www.figma.com/file/YOUR_FIGMA_ID/warehouse-robot-dashboard)
 
 Your Figma should include:
 
-Home Dashboard
+* Home Dashboard
+* Bot Status
+* Task Allocation
+* Optional: SVG Map Page layout
+* Component hierarchy and spacing tokens
 
-Bot Status
+---
 
-Task Allocation
+# 📝 **Extras Included (Bonus Work)**
 
-Optional: SVG Map Page layout
+### ✔ Animated Bot Cards
 
-Component hierarchy and spacing tokens
+* Gradient headers
+* Sparkline trend graph
+* Expanding details
+* Hover motion effects
 
-📝 Extras Included (Bonus Work)
-✔ Animated Bot Cards
+### ✔ SVG Map Page
 
-Gradient headers
+* Upload any warehouse layout SVG
+* Render directly
+* Bots move over coordinates
 
-Sparkline trend graph
+### ✔ Optional Three.js Visualizer
 
-Expanding details
+(`/next-visual/three-map`)
 
-Hover motion effects
+* 3D animated bot movement
+* @react-three/fiber & drei
 
-✔ SVG Map Page
+---
 
-Upload any warehouse layout SVG
+# 🚀 **Future Improvements**
 
-Render directly
+* Real WebSocket backend
+* Live telemetry stream
+* Real map coordinates from warehouse systems
+* User roles & permissions
+* Offline sync
+* Error monitoring with Sentry
 
-Bots move over coordinates
+---
 
-✔ Optional Three.js Visualizer
+# 🙌 **Author**
 
-(/next-visual/three-map)
+**Your Name**
+**Email:** [your-email@example.com](mailto:your-email@example.com)
+**GitHub:** github.com/YOUR_USERNAME
 
-3D animated bot movement
-
-@react-three/fiber & drei
-
-🚀 Future Improvements
-
-Real WebSocket backend
-
-Live telemetry stream
-
-Real map coordinates from warehouse systems
-
-User roles & permissions
-
-Offline sync
-
-Error monitoring with Sentry
-
-🙌 Author
-
-Your Name
-Email: your-email@example.com
-
-GitHub: github.com/YOUR_USERNAME
+---
