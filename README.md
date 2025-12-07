@@ -231,22 +231,6 @@ Pages remain fast and never over-render.
 
 ---
 
-# 🎨 **Figma Link (Bonus)**
-
-> Replace the link below with your real share URL:
-
-👉 **Figma Design:**
-[https://www.figma.com/file/YOUR_FIGMA_ID/warehouse-robot-dashboard](https://www.figma.com/file/YOUR_FIGMA_ID/warehouse-robot-dashboard)
-
-Your Figma should include:
-
-* Home Dashboard
-* Bot Status
-* Task Allocation
-* Optional: SVG Map Page layout
-* Component hierarchy and spacing tokens
-
----
 
 # 📝 **Extras Included (Bonus Work)**
 
@@ -286,7 +270,7 @@ Your Figma should include:
 # 🙌 **Author**
 
 **Your Name**
-**Email:** [your-email@example.com](mailto:your-email@example.com)
-**GitHub:** github.com/YOUR_USERNAME
+**Email:** [kachhiyarutvik04@gmail.com](mailto:kachhiyarutvik04@gmail.com)
+**GitHub:** github.com/rutvik-max
 
 ---
