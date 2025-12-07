@@ -1,4 +1,3 @@
-// frontend/src/layouts/MainLayout.tsx
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Home, Box, ListChecks, Clock, BarChart2, MapPin, LogOut, Sun, Moon, Bell } from "lucide-react";
@@ -26,7 +25,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <div className="min-h-screen flex bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100">
-      {/* SIDEBAR */}
+      {}
       <aside className="w-20 lg:w-64 bg-white dark:bg-slate-800 border-r dark:border-slate-700 hidden lg:flex flex-col p-4 gap-6">
         <div className="flex items-center gap-3">
           <div className="rounded-md bg-primary text-white w-10 h-10 flex items-center justify-center font-bold">WR</div>
@@ -69,7 +68,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         </div>
       </aside>
 
-      {/* Mobile bottom nav */}
+      {}
       <div className="lg:hidden fixed bottom-4 left-1/2 transform -translate-x-1/2 z-30">
         <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg px-3 py-2 flex items-center gap-2">
           {navItems.map((n) => {
@@ -84,7 +83,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         </div>
       </div>
 
-      {/* CONTENT */}
+      {}
       <div className="flex-1 min-h-screen">
         <header className="bg-white dark:bg-slate-800 border-b dark:border-slate-700 p-3 sm:p-4 flex items-center justify-between">
           <div className="flex items-center gap-4">

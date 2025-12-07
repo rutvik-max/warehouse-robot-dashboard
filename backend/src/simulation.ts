@@ -1,4 +1,3 @@
-// backend/src/simulation.ts
 import { Server as IOServer } from "socket.io";
 
 export type BotStatus = "idle" | "busy" | "charging" | "error";
@@ -76,16 +75,16 @@ export class Simulation {
   }
 
   start() {
-    // update bots every 10s
+    // bots in 10s
     if (this.intervalId) return;
     this.intervalId = setInterval(() => {
       this.bots = this.bots.map((b) => {
-        // battery change
+        
         let battery = b.battery;
         if (b.status !== "charging") battery = Math.max(0, battery - rnd(0, 8));
         else battery = Math.min(100, battery + rnd(1, 10));
 
-        // small chance to change status slightly
+        
         if (Math.random() < 0.15) {
           const statuses: BotStatus[] = ["idle", "busy", "charging", "error"];
           const status = statuses[rnd(0, statuses.length - 1)];

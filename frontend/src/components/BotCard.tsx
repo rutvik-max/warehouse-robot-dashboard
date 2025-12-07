@@ -1,19 +1,10 @@
-// frontend/src/components/BotCard.tsx
+
 import React, { useEffect, useRef, useState } from "react";
 import type { Bot } from "../api/serverApi";
 import clsx from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles } from "lucide-react";
 
-/**
- * Vibrant, interactive BotCard (final)
- * - Uses CSS variables for palettes:
- *   header gradient: linear-gradient(90deg, var(--primary-from), var(--primary-to))
- *   battery fill: var(--battery-gradient)
- *   sparkline stroke: var(--sparkline-stroke)
- * - Hover lift + shadow, click-to-expand details
- * - Keeps core bot fields & logic unchanged
- */
 
 function timeAgo(ts?: number) {
   if (!ts) return "n/a";
@@ -36,7 +27,7 @@ export default function BotCard({ bot }: { bot: Bot }) {
 
   const values = historyRef.current.length ? historyRef.current : [Number(bot.battery ?? 0)];
 
-  // Sparkline (simplified to use CSS var for stroke)
+  // Sparkle added
   const SparklineSVG = (() => {
     if (!values || values.length < 2) {
       return (
@@ -62,7 +53,7 @@ export default function BotCard({ bot }: { bot: Bot }) {
     return (
       <svg width="100%" viewBox={`0 0 ${w} ${h}`} className="rounded-lg">
         <defs>
-          {/* subtle blur for depth (kept simple) */}
+          {}
           <filter id={`blur-${id}`} x="-20%" y="-20%" width="140%" height="140%">
             <feGaussianBlur stdDeviation="6" result="coloredBlur" />
             <feMerge>
@@ -72,7 +63,7 @@ export default function BotCard({ bot }: { bot: Bot }) {
           </filter>
         </defs>
 
-        {/* Optional subtle area fill using a translucent rectangle (keeps things simple and palette-driven) */}
+        {}
         <rect x="0" y={h - 6} width={w} height={6} fill="rgba(0,0,0,0.03)" />
 
         <polyline
@@ -87,7 +78,6 @@ export default function BotCard({ bot }: { bot: Bot }) {
     );
   })();
 
-  // status pill (keeps strong readable colors though palettes define the accent)
   const statusClass = {
     idle: "bg-white/8 text-white/90",
     busy: "bg-indigo-600 text-white",
@@ -95,7 +85,6 @@ export default function BotCard({ bot }: { bot: Bot }) {
     error: "bg-red-500 text-white",
   }[bot.status] ?? "bg-slate-600 text-white";
 
-  // Use CSS variables for header gradient (palette controls these variables)
   const headerStyle: React.CSSProperties = {
     background: `linear-gradient(90deg, var(--primary-from, #8b5cf6), var(--primary-to, #4f46e5))`,
   };
@@ -135,7 +124,7 @@ export default function BotCard({ bot }: { bot: Bot }) {
           </div>
         </div>
 
-        {/* Body - glass content area (uses default / dark styles via your CSS) */}
+        {/* dark  */}
         <div className="bg-white/80 dark:bg-slate-900/70 backdrop-blur-sm p-4">
           <div className="grid grid-cols-1 gap-3">
             <div className="flex items-center justify-between gap-4">
@@ -152,7 +141,7 @@ export default function BotCard({ bot }: { bot: Bot }) {
               </div>
             </div>
 
-            {/* Battery bar (uses CSS battery gradient variable) */}
+            {}
             <div>
               <div className="flex items-center justify-between">
                 <div className="text-xs text-slate-500 dark:text-slate-300">Battery</div>
@@ -172,14 +161,14 @@ export default function BotCard({ bot }: { bot: Bot }) {
               </div>
             </div>
 
-            {/* Sparkline area */}
+            {}
             <div className="pt-1">
               <div className="text-xs text-slate-500 dark:text-slate-300 mb-1">Trend</div>
               <div className="w-full h-12">{SparklineSVG}</div>
             </div>
           </div>
 
-          {/* Expanded details */}
+          {}
           <AnimatePresence>
             {expanded && (
               <motion.div

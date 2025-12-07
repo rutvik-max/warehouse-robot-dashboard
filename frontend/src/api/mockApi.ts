@@ -1,7 +1,3 @@
-// frontend/src/api/mockApi.ts
-// Simple in-memory mock for bots and tasks, with helper functions.
-// This runs in the browser and is intended for dev/demo only.
-
 export type BotStatus = "idle" | "busy" | "charging" | "error";
 
 export type Bot = {
@@ -48,7 +44,7 @@ function makeBot(i: number): Bot {
 let bots: Bot[] = Array.from({ length: 10 }, (_, i) => makeBot(i + 1));
 let tasks: Task[] = []; // pending tasks queue
 
-// initialize some tasks
+
 for (let i = 1; i <= 5; i++) {
   tasks.push({
     id: `task-${i}`,
@@ -61,15 +57,15 @@ for (let i = 1; i <= 5; i++) {
   });
 }
 
-// Simulate changes: every 10s randomly update some bots (battery/status/lastUpdated)
+// bots change in 10 sec
 setInterval(() => {
   bots = bots.map((b) => {
-    // small random battery drain unless charging
+    //battery changes
     let battery = b.battery;
     if (b.status !== "charging") battery = Math.max(0, battery - random(0, 8));
     else battery = Math.min(100, battery + random(1, 10));
 
-    // random status flip chance
+    
     if (Math.random() < 0.15) {
       const statuses: BotStatus[] = ["idle", "busy", "charging", "error"];
       const status = statuses[random(0, statuses.length - 1)];
@@ -91,7 +87,7 @@ setInterval(() => {
 
 export const mockApi = {
   getBots: async (): Promise<Bot[]> => {
-    // simulate network delay
+    
     await new Promise((r) => setTimeout(r, random(100, 300)));
     return bots;
   },

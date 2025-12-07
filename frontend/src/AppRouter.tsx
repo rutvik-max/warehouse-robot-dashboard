@@ -1,4 +1,3 @@
-// frontend/src/AppRouter.tsx
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
@@ -17,7 +16,6 @@ export default function AppRouter() {
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
-        {/* protected */}
         <Route path="/dashboard" element={<ProtectedRoute><HomeDashboard /></ProtectedRoute>} />
         <Route path="/bots" element={<ProtectedRoute><BotStatusPage /></ProtectedRoute>} />
         <Route path="/tasks" element={<ProtectedRoute><TaskAllocationPage /></ProtectedRoute>} />

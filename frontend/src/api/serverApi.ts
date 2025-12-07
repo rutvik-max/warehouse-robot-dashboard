@@ -1,4 +1,3 @@
-// frontend/src/api/serverApi.ts
 import { io, Socket } from "socket.io-client";
 export type BotStatus = "idle" | "busy" | "charging" | "error";
 
