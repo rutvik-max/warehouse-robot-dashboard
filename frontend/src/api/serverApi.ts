@@ -1,4 +1,5 @@
-import { io, Socket } from "socket.io-client";
+// frontend/src/api/serverApi.ts
+
 export type BotStatus = "idle" | "busy" | "charging" | "error";
 
 export type Bot = {
@@ -23,42 +24,60 @@ export type Task = {
   createdAt: number;
 };
 
-const SERVER = import.meta.env.VITE_API_BASE || "http://localhost:4000";
+// Read API base from Vite env
+const API_BASE =
+  (import.meta as any).env?.VITE_API_BASE &&
+  (import.meta as any).env?.VITE_API_BASE !== "undefined"
+    ? (import.meta as any).env.VITE_API_BASE
+    : "http://localhost:4000";
 
-let socket: Socket | null = null;
+console.log("[serverApi] Using API:", API_BASE);
+
+// Helper to fetch JSON with better error messages
+async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
+  const url = `${API_BASE}${path}`;
+  const res = await fetch(url, init);
+
+  if (!res.ok) {
+    let body = "";
+    try {
+      body = await res.text();
+    } catch {}
+
+    throw new Error(
+      `Fetch failed: ${res.status} ${res.statusText}\nURL: ${url}\n${body}`
+    );
+  }
+
+  return res.json();
+}
+
+// ======== REST API WRAPPERS ========
 
 export const serverApi = {
-
-  // fetch REST endpoints
   getBots: async (): Promise<Bot[]> => {
-    const r = await fetch(`${SERVER}/api/bots`);
-    if (!r.ok) throw new Error("Failed to fetch bots");
-    return r.json();
+    return fetchJson<Bot[]>("/api/bots");
   },
 
   getTasks: async (): Promise<Task[]> => {
-    const r = await fetch(`${SERVER}/api/tasks`);
-    if (!r.ok) throw new Error("Failed to fetch tasks");
-    return r.json();
+    return fetchJson<Task[]>("/api/tasks");
   },
 
-  addTask: async (task: Omit<Task, "id" | "createdAt">): Promise<Task> => {
-    const r = await fetch(`${SERVER}/api/tasks`, {
+  addTask: async (
+    task: Omit<Task, "id" | "createdAt">
+  ): Promise<Task> => {
+    return fetchJson<Task>("/api/tasks", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(task),
     });
-    if (!r.ok) {
-      const err = await r.json().catch(() => ({}));
-      throw new Error(err?.error || "Failed to add task");
-    }
-    return r.json();
   },
 
   popTask: async (): Promise<Task | null> => {
-    const r = await fetch(`${SERVER}/api/tasks/pop`, { method: "POST" });
-    if (!r.ok) throw new Error("Failed to pop");
-    const data = await r.json();
+    const data = await fetchJson<{ popped?: Task | null }>(
+      "/api/tasks/pop",
+      { method: "POST" }
+    );
     return data.popped ?? null;
   },
 };
