@@ -15,8 +15,6 @@ type DataState = {
 };
 
 export const useDataStore = create<DataState>((set) => {
-  // initialization guard (module-scoped)
-  let initialized = (globalThis as any).__DATA_STORE_INIT_DONE ?? false;
 
   // interval refs stored on globalThis to persist across HMR in dev
   const GLOBAL = globalThis as any;
