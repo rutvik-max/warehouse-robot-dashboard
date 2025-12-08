@@ -15,7 +15,14 @@ type DataState = {
 };
 
 export const useDataStore = create<DataState>((set) => {
-  let initialized = false;
+  // initialization guard (module-scoped)
+  let initialized = (globalThis as any).__DATA_STORE_INIT_DONE ?? false;
+
+  // interval refs stored on globalThis to persist across HMR in dev
+  const GLOBAL = globalThis as any;
+  GLOBAL.__DATA_STORE_INIT_DONE = GLOBAL.__DATA_STORE_INIT_DONE ?? false;
+  GLOBAL.__DATA_STORE_BOTS_INTERVAL = GLOBAL.__DATA_STORE_BOTS_INTERVAL ?? null;
+  GLOBAL.__DATA_STORE_POP_INTERVAL = GLOBAL.__DATA_STORE_POP_INTERVAL ?? null;
 
   const computeAndSet = (bots: Bot[], tasks: Task[]) => {
     const totalBots = bots.length;
@@ -41,24 +48,54 @@ export const useDataStore = create<DataState>((set) => {
       const [bots, tasks] = await Promise.all([serverApi.getBots(), serverApi.getTasks()]);
       computeAndSet(bots, tasks);
     } catch (err) {
-      console.error("fetchAll error", err);
+      console.error("useDataStore.fetchAll error", err);
       set({ loading: false });
     }
   }
 
-  // initialize socket and REST fetch once
-  if (!initialized) {
-    initialized = true;
-    // initial data fetch
+  async function popAndRefresh() {
+    try {
+      const popped = await serverApi.popTask();
+      if (popped) {
+        // if a task was popped/assigned, refresh tasks (and bots)
+        await fetchAll();
+      }
+    } catch (err) {
+      console.error("useDataStore.popAndRefresh error", err);
+    }
+  }
+
+  // initialize polling only once (persist across HMR dev reloads)
+  if (!GLOBAL.__DATA_STORE_INIT_DONE) {
+    GLOBAL.__DATA_STORE_INIT_DONE = true;
+
+    // initial fetch
     void fetchAll();
 
-    // connect socket: server pushes updates
-    serverApi.connectSocket((payload) => {
-      // payload has bots and tasks
-      computeAndSet(payload.bots, payload.tasks);
+    // poll every 10s for fresh bots/tasks
+    GLOBAL.__DATA_STORE_BOTS_INTERVAL = window.setInterval(() => {
+      void fetchAll();
+    }, 10_000);
+
+    // simulate task assignment: pop one every 3s
+    GLOBAL.__DATA_STORE_POP_INTERVAL = window.setInterval(() => {
+      void popAndRefresh();
+    }, 3_000);
+
+    // cleanup on page unload
+    window.addEventListener("beforeunload", () => {
+      if (GLOBAL.__DATA_STORE_BOTS_INTERVAL) {
+        clearInterval(GLOBAL.__DATA_STORE_BOTS_INTERVAL);
+        GLOBAL.__DATA_STORE_BOTS_INTERVAL = null;
+      }
+      if (GLOBAL.__DATA_STORE_POP_INTERVAL) {
+        clearInterval(GLOBAL.__DATA_STORE_POP_INTERVAL);
+        GLOBAL.__DATA_STORE_POP_INTERVAL = null;
+      }
     });
   }
 
+  // initial state return
   return {
     bots: [],
     tasks: [],
