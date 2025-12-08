@@ -1,4 +1,4 @@
-// frontend/src/pages/LoginPage.tsx
+// loginPage code
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import Card from "../components/ui/card";
@@ -31,7 +31,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[#FF7AF3] via-[#7C3AED] to-[#4F46E5]">
       <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-        {/* Left: Tagline / About */}
+        {/* Left*/}
         <div className="hidden lg:flex flex-col gap-6 text-white">
           <div className="p-6 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10">
             <h1 className="text-4xl font-extrabold tracking-tight">Warehouse Robot Console</h1>
@@ -60,7 +60,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Right: Login Card */}
+        {/* Right */}
         <div className="mx-auto w-full max-w-md">
           <Card>
             <div className="mb-4">
@@ -104,7 +104,7 @@ export default function LoginPage() {
             </div>
           </Card>
 
-          {/* small footer */}
+          {/* small  */}
           <div className="mt-4 text-center text-sm text-white/80 lg:hidden">
             <div className="font-semibold">Warehouse Robot Console</div>
             <div className="text-xs">Real-time simulation — built for demo & interviews.</div>

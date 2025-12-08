@@ -1,6 +1,6 @@
-// frontend/src/state/useDataStore.ts
+// useDataStore code
 import { create } from "zustand";
-import { serverApi, type Bot, type Task } from "../api/serverApi";
+import { mockApi, type Bot, type Task } from "../api/mockApi";
 
 type DataState = {
   bots: Bot[];
@@ -16,7 +16,7 @@ type DataState = {
 
 export const useDataStore = create<DataState>((set) => {
 
-  // interval refs stored on globalThis to persist across HMR in dev
+  // interval refs stored 
   const GLOBAL = globalThis as any;
   GLOBAL.__DATA_STORE_INIT_DONE = GLOBAL.__DATA_STORE_INIT_DONE ?? false;
   GLOBAL.__DATA_STORE_BOTS_INTERVAL = GLOBAL.__DATA_STORE_BOTS_INTERVAL ?? null;
@@ -43,7 +43,7 @@ export const useDataStore = create<DataState>((set) => {
   async function fetchAll() {
     set({ loading: true });
     try {
-      const [bots, tasks] = await Promise.all([serverApi.getBots(), serverApi.getTasks()]);
+      const [bots, tasks] = await Promise.all([mockApi.getBots(), mockApi.getTasks()]);
       computeAndSet(bots, tasks);
     } catch (err) {
       console.error("useDataStore.fetchAll error", err);
@@ -53,7 +53,7 @@ export const useDataStore = create<DataState>((set) => {
 
   async function popAndRefresh() {
     try {
-      const popped = await serverApi.popTask();
+      const popped = await mockApi.popTask();
       if (popped) {
         // if a task was popped/assigned, refresh tasks (and bots)
         await fetchAll();

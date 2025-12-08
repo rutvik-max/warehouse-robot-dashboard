@@ -1,4 +1,4 @@
-// frontend/src/components/ProtectedRoute.tsx
+// protected code
 import React from "react";
 import { Navigate } from "react-router-dom";
 import { useAuthStore } from "../state/useAuthStore";

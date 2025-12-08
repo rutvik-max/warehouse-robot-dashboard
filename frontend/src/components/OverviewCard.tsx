@@ -1,4 +1,4 @@
-// frontend/src/components/OverviewCard.tsx
+// overviewCard code
 import clsx from "clsx";
 
 type Props = {

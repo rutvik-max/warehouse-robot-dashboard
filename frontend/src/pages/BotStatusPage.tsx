@@ -1,4 +1,4 @@
-// frontend/src/pages/BotStatusPage.tsx
+// botStatuspage code
 import { useEffect, useState, useMemo } from "react";
 import MainLayout from "../layouts/MainLayout";
 import Card from "../components/ui/card";
@@ -47,10 +47,10 @@ export default function BotStatusPage() {
         </div>
 
         <Card>
-          {/* Controls */}
+          {}
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
             
-            {/* Search */}
+            {}
             <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-md w-full lg:w-64">
               <Search className="w-4 h-4 text-slate-500" />
               <input
@@ -61,7 +61,7 @@ export default function BotStatusPage() {
               />
             </div>
 
-            {/* Status Filter */}
+            {}
             <div className="flex items-center gap-2">
               {["idle", "busy", "charging", "error"].map((s) => (
                 <button
@@ -78,7 +78,7 @@ export default function BotStatusPage() {
               ))}
             </div>
 
-            {/* Battery Sort */}
+            {}
             <div className="flex items-center gap-2">
               <Battery className="w-4 h-4 text-slate-500" />
               <button

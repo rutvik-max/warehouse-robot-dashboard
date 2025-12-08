@@ -1,4 +1,4 @@
-// frontend/src/components/ui/IconButton.tsx
+// icon code
 import React from "react";
 import clsx from "clsx";
 

@@ -3,9 +3,9 @@
 @tailwind utilities;
 @import "tailwindcss";
 
-/* put global base styles in a base layer so @apply works */
+
 @layer base {
-  /* Use variables for background & text so palettes and dark mode work */
+
   html, body {
     background-color: rgb(var(--bg-rgb, 255 255 255));
     color: var(--text-color, #0f172a);

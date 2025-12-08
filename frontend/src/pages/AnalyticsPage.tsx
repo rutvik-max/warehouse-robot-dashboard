@@ -66,7 +66,6 @@ export default function AnalyticsPage() {
 
   const COLORS = ["#60A5FA", "#A78BFA", "#FBBF24", "#F87171"];
 
-  // helper small wrapper style to ensure Recharts can measure
   const chartWrapperStyle: React.CSSProperties = {
     width: "100%",
     height: 280,
@@ -80,7 +79,7 @@ export default function AnalyticsPage() {
           <Card>
             <h3 className="text-lg font-semibold mb-2">Tasks over time</h3>
 
-            {/* Give a fixed-height container so ResponsiveContainer can measure */}
+            {}
             <div style={chartWrapperStyle}>
               {tasksTimeSeries.length === 0 ? (
                 <div className="flex items-center justify-center h-full text-sm text-slate-500">No task data yet</div>

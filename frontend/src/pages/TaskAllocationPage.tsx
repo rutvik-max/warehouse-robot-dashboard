@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import Card from "../components/ui/card";
-import { serverApi } from "../api/serverApi";
+import { mockApi } from "../api/mockApi";
 import { useDataStore } from "../state/useDataStore";
 import { useToast } from "../components/Toast";
 
@@ -37,7 +37,7 @@ export default function TaskAllocationPage() {
         return;
       }
 
-      await serverApi.addTask({
+      await mockApi.addTask({
         type: data.type,
         priority: data.priority,
         from: data.from,

@@ -1,19 +1,8 @@
-// frontend/src/pages/SvgLayoutMapPage.tsx
+// SvgLayoutMapPage code
 import React, { useEffect, useRef, useState } from "react";
 import MainLayout from "../layouts/MainLayout";
 import Card from "../components/ui/card";
 import { useDataStore } from "../state/useDataStore";
-
-/**
- * SVG Layout Map Page
- *
- * - Upload an SVG file and it will be rendered directly.
- * - Bots are overlayed as SVG circles inside the SVG coordinate space.
- * - Bots move randomly (simulated) inside the SVG viewBox bounds.
- *
- * Usage:
- * - Place this page on route /svg-map or replace your MapPage with this file.
- */
 
 type BotSim = {
   id: string;
@@ -21,7 +10,7 @@ type BotSim = {
   x: number;
   y: number;
   color: string;
-  speed: number; // px per update in svg coords
+  speed: number; 
 };
 
 const SAMPLE_SVG = `
@@ -67,7 +56,7 @@ export default function SvgLayoutMapPage() {
 
   const storeBots = useDataStore((s: any) => s.bots) ?? null;
 
-  // keep local bots, prefer store bots if available
+ 
   const [bots, setBots] = useState<BotSim[]>(() => {
     if (storeBots && storeBots.length) {
       return storeBots.slice(0, 12).map((b: any, i: number) => ({
@@ -79,7 +68,7 @@ export default function SvgLayoutMapPage() {
         speed: 0.8 + Math.random() * 1.8,
       }));
     }
-    // generate 8 simulated bots
+   
     return Array.from({ length: 8 }).map((_, i) => ({
       id: `sim-${i}`,
       name: `B${i + 1}`,
@@ -112,7 +101,7 @@ export default function SvgLayoutMapPage() {
 
     let bbox: DOMRect | null = null;
     try {
-      // getBBox can throw on some SVGs in certain environments; guard it
+    
       const b = (svgEl as any).getBBox?.();
       if (b) bbox = b;
     } catch (e) {

@@ -19,10 +19,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   loading: false,
 
-  // mock login: accept any non-empty email/password, simulate API delay
+  // mock 
   login: async (email: string, password: string) => {
     set({ loading: true });
-    // fake API delay
+    // fake API d
     await new Promise((r) => setTimeout(r, 700));
     if (!email || !password) {
       set({ loading: false });
@@ -33,7 +33,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     return user;
   },
 
-  // mock register: create user and sign in immediately
+  // mock register
   register: async (name: string, email: string, password: string) => {
     set({ loading: true });
     await new Promise((r) => setTimeout(r, 800));

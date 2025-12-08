@@ -1,4 +1,4 @@
-// frontend/src/pages/MapPage.tsx
+//mapPage code
 import MainLayout from "../layouts/MainLayout";
 import Card from "../components/ui/card";
 import SvgMapViewer from "../components/SvgMapViewer";

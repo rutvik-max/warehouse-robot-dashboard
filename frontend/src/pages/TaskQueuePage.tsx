@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import MainLayout from "../layouts/MainLayout";
 import Card from "../components/ui/card";
 import TaskItem from "../components/TaskItem";
-import { serverApi } from "../api/serverApi";
+import { mockApi } from "../api/mockApi";
 import { useDataStore } from "../state/useDataStore";
 
 export default function TaskQueuePage() {
@@ -20,7 +20,7 @@ export default function TaskQueuePage() {
     intervalRef.current = window.setInterval(async () => {
       setPopping(true);
       try {
-        const popped = await serverApi.popTask();
+        const popped = await mockApi.popTask();
         if (popped) await refresh();
         else await refresh();
       } catch (err) {

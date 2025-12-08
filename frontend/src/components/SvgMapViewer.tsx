@@ -1,19 +1,6 @@
 // frontend/src/components/SvgMapViewer.tsx
 import React, { useEffect, useRef, useState } from "react";
 import { useDataStore } from "../state/useDataStore";
-
-/**
- * SvgMapViewer
- * Props:
- *  - containerClassName?: string  (optional, e.g. "h-[560px]")
- *
- * Behavior:
- *  - Accepts an uploaded SVG file
- *  - Renders SVG markup inside a container preserving viewBox scaling
- *  - Overlays bots as circles positioned by mapping (x,y) in viewBox space -> pixels
- *  - Simulates random movement for bots if positions missing
- */
-
 type Props = {
   containerClassName?: string;
 };
@@ -26,7 +13,7 @@ export default function SvgMapViewer({ containerClassName = "h-[520px]" }: Props
   const [viewBox, setViewBox] = useState<{ minX: number; minY: number; vbW: number; vbH: number } | null>(null);
   const [positions, setPositions] = useState<Record<string, { x: number; y: number }>>({});
 
-  // initialize bot positions to random points in viewBox
+  // initialize bot positions 
   useEffect(() => {
     if (!viewBox) return;
     setPositions((prev) => {
@@ -43,7 +30,7 @@ export default function SvgMapViewer({ containerClassName = "h-[520px]" }: Props
     });
   }, [bots, viewBox]);
 
-  // random-walk simulation (client-side)
+  // random-walk 
   useEffect(() => {
     if (!viewBox) return;
     const id = window.setInterval(() => {
@@ -51,12 +38,10 @@ export default function SvgMapViewer({ containerClassName = "h-[520px]" }: Props
         const next = { ...prev };
         for (const b of bots) {
           const p = next[b.id] ?? { x: viewBox.minX + Math.random() * viewBox.vbW, y: viewBox.minY + Math.random() * viewBox.vbH };
-          // random small delta scaled by viewBox size
           const dx = (Math.random() - 0.5) * (viewBox.vbW * 0.02);
           const dy = (Math.random() - 0.5) * (viewBox.vbH * 0.02);
           let nx = p.x + dx;
           let ny = p.y + dy;
-          // clamp inside viewBox
           nx = Math.max(viewBox.minX, Math.min(viewBox.minX + viewBox.vbW, nx));
           ny = Math.max(viewBox.minY, Math.min(viewBox.minY + viewBox.vbH, ny));
           next[b.id] = { x: nx, y: ny };
@@ -67,7 +52,6 @@ export default function SvgMapViewer({ containerClassName = "h-[520px]" }: Props
     return () => clearInterval(id);
   }, [bots, viewBox]);
 
-  // helper: parse uploaded SVG text and extract viewBox
   function handleSvgText(text: string) {
     setSvgMarkup(text);
     // Try to parse viewBox from markup
@@ -110,19 +94,6 @@ export default function SvgMapViewer({ containerClassName = "h-[520px]" }: Props
     reader.readAsText(f);
   }
 
-  // Map viewBox coords to pixel coordinates inside svgWrapperRef
-  // function mapToPixel(x: number, y: number) {
-  //   const wrap = svgWrapperRef.current;
-  //   if (!wrap || !viewBox) return { px: 0, py: 0 };
-  //   const rect = wrap.getBoundingClientRect();
-  //   const scaleX = rect.width / viewBox.vbW;
-  //   const scaleY = rect.height / viewBox.vbH;
-  //   // const px = (x - viewBox.minX) * scaleX + rect.left;
-  //   // const py = (y - viewBox.minY) * scaleY + rect.top;
-  //   // convert to local coords relative to wrapper
-  //   return { px: (x - viewBox.minX) * scaleX, py: (y - viewBox.minY) * scaleY };
-  // }
-
   return (
     <div className={containerClassName + " relative"} ref={containerRef}>
       <div className="flex items-center gap-3 mb-3">
@@ -139,9 +110,8 @@ export default function SvgMapViewer({ containerClassName = "h-[520px]" }: Props
         className="w-full h-full bg-white/10 rounded border overflow-hidden relative flex items-center justify-center"
         style={{ minHeight: 280 }}
       >
-        {/* Render SVG markup if provided, otherwise show prompt */}
+        {}
         {svgMarkup ? (
-          // Danger note: we insert sanitized-looking markup. For production consider using DOMPurify.
           <div
             className="absolute inset-0"
             style={{ pointerEvents: "none" }}

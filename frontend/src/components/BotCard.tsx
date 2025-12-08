@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef, useState } from "react";
-import type { Bot } from "../api/serverApi";
+import type { Bot } from "../api/mockApi";
 import clsx from "clsx";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles } from "lucide-react";

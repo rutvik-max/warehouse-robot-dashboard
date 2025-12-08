@@ -1,7 +1,7 @@
-// frontend/src/components/TaskItem.tsx
+// taskitem code
 
 import clsx from "clsx";
-import type { Task } from "../api/serverApi";
+import type { Task } from "../api/mockApi";
 
 type Props = {
   task: Task;

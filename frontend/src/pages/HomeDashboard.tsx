@@ -1,4 +1,4 @@
-// frontend/src/pages/HomeDashboard.tsx
+// homeDashboard code
 import { useEffect } from "react";
 import MainLayout from "../layouts/MainLayout";
 import StatCard from "../components/ui/StatCard";
@@ -7,17 +7,6 @@ import BotCard from "../components/BotCard";
 import { useDataStore } from "../state/useDataStore";
 import { motion } from "framer-motion";
 
-/**
- * Interactive Dashboard (final)
- * - Big stat grid
- * - Bots preview grid (mini card view using BotCard)
- * - Analytics snapshot + Recent activity feed
- * - Quick actions (create task, refresh, speed up sim)
- *
- * No logic changes; only UI layer.
- */
-
-// Helper: Convert timestamp → "3m ago", "10s ago", etc.
 function timeAgo(ts?: number) {
   if (!ts) return "n/a";
   const d = Date.now() - ts;
@@ -41,7 +30,7 @@ export default function HomeDashboard() {
 
   useEffect(() => {
     void refresh();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, []);
 
   const miniBots = Array.isArray(bots) ? bots.slice(0, 6) : [];
@@ -54,7 +43,7 @@ export default function HomeDashboard() {
         transition={{ duration: 0.35 }}
         className="max-w-7xl mx-auto space-y-6"
       >
-        {/* Top big stat grid */}
+        {}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           <StatCard title="Total Bots" value={loading ? "..." : totalBots} tone="neutral" />
           <StatCard title="Active Tasks" value={loading ? "..." : activeTasksCount} tone="accent" />
@@ -63,9 +52,9 @@ export default function HomeDashboard() {
           <StatCard title="Pending Tasks" value={loading ? "..." : pendingTasks} tone="positive" />
         </div>
 
-        {/* Large content grid */}
+        {}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* LEFT: Recent activity big card */}
+          {}
           <Card className="lg:col-span-2">
             <div className="flex items-start justify-between gap-4">
               <div>

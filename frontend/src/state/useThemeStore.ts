@@ -1,4 +1,4 @@
-// frontend/src/state/useThemeStore.ts
+// useThemeStore code
 import { create } from "zustand";
 
 type Theme = "light" | "dark";
@@ -8,11 +8,11 @@ function applyHtmlClass(theme: Theme, palette: Palette) {
   try {
     const el = document.documentElement;
     if (!el) return;
-    // dark class
+    // dark 
     if (theme === "dark") el.classList.add("dark");
     else el.classList.remove("dark");
 
-    // remove all palette classes, then add chosen
+    // remove all palette classes
     el.classList.remove("theme-electric", "theme-ocean", "theme-sunset");
     el.classList.add(`theme-${palette}`);
   } catch (e) {

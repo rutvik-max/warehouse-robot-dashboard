@@ -1,10 +1,11 @@
-// frontend/src/pages/SignupPage.tsx
+// signupPage code
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import Card from "../components/ui/card";
 import { useAuthStore } from "../state/useAuthStore";
 import { useToast } from "../components/Toast";
 import clsx from "clsx";
+
 
 type FormValues = {
   name: string;
