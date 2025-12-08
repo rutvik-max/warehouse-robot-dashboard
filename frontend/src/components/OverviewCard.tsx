@@ -1,5 +1,4 @@
 // frontend/src/components/OverviewCard.tsx
-import React from "react";
 import clsx from "clsx";
 
 type Props = {

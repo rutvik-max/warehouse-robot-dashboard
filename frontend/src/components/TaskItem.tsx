@@ -1,5 +1,5 @@
 // frontend/src/components/TaskItem.tsx
-import React from "react";
+
 import clsx from "clsx";
 import type { Task } from "../api/serverApi";
 
