@@ -28,25 +28,6 @@ const SERVER = import.meta.env.VITE_API_BASE || "http://localhost:4000";
 let socket: Socket | null = null;
 
 export const serverApi = {
-  connectSocket: (onState: (data: { bots: Bot[]; tasks: Task[] }) => void) => {
-    if (socket) {
-      return;
-    }
-    socket = io(SERVER, { transports: ["websocket"] });
-
-    socket.on("connect", () => {
-      console.log("connected to server socket", socket?.id);
-    });
-
-    socket.on("state", (payload: { bots: Bot[]; tasks: Task[] }) => {
-      onState(payload);
-    });
-
-    socket.on("disconnect", () => {
-      console.log("socket disconnected");
-      socket = null;
-    });
-  },
 
   // fetch REST endpoints
   getBots: async (): Promise<Bot[]> => {
