@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Home, Box, ListChecks, Clock, BarChart2, MapPin, LogOut, Sun, Moon, Bell } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuthStore } from "../state/useAuthStore";
-import { useThemeStore, type Palette } from "../state/useThemeStore";
+import { useThemeStore } from "../state/useThemeStore";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: Home },
@@ -20,8 +20,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const user = useAuthStore((s) => s.user);
   const theme = useThemeStore((s) => s.theme);
   const toggleTheme = useThemeStore((s) => s.toggleTheme);
-  const palette = useThemeStore((s) => s.palette);
-  const setPalette = useThemeStore((s) => s.setPalette);
+  // const palette = useThemeStore((s) => s.palette);
+  // const setPalette = useThemeStore((s) => s.setPalette);
 
   return (
     <div className="min-h-screen flex bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100">

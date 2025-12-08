@@ -1,10 +1,10 @@
 // frontend/src/pages/BotStatusPage.tsx
-import React, { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import MainLayout from "../layouts/MainLayout";
 import Card from "../components/ui/card";
 import BotCard from "../components/BotCard";
 import { useDataStore } from "../state/useDataStore";
-import { Search, Filter, Battery, ChevronUp, ChevronDown } from "lucide-react";
+import { Search, Battery, ChevronUp, ChevronDown } from "lucide-react";
 
 export default function BotStatusPage() {
   const bots = useDataStore((s) => s.bots);

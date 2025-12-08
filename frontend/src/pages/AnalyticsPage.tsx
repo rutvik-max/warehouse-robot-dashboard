@@ -110,7 +110,7 @@ export default function AnalyticsPage() {
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie data={statusDistribution} dataKey="value" nameKey="name" outerRadius={80} label>
-                        {statusDistribution.map((entry, index) => (
+                        {statusDistribution.map((_entry, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>

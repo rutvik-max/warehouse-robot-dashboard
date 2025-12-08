@@ -111,17 +111,17 @@ export default function SvgMapViewer({ containerClassName = "h-[520px]" }: Props
   }
 
   // Map viewBox coords to pixel coordinates inside svgWrapperRef
-  function mapToPixel(x: number, y: number) {
-    const wrap = svgWrapperRef.current;
-    if (!wrap || !viewBox) return { px: 0, py: 0 };
-    const rect = wrap.getBoundingClientRect();
-    const scaleX = rect.width / viewBox.vbW;
-    const scaleY = rect.height / viewBox.vbH;
-    const px = (x - viewBox.minX) * scaleX + rect.left;
-    const py = (y - viewBox.minY) * scaleY + rect.top;
-    // convert to local coords relative to wrapper
-    return { px: (x - viewBox.minX) * scaleX, py: (y - viewBox.minY) * scaleY };
-  }
+  // function mapToPixel(x: number, y: number) {
+  //   const wrap = svgWrapperRef.current;
+  //   if (!wrap || !viewBox) return { px: 0, py: 0 };
+  //   const rect = wrap.getBoundingClientRect();
+  //   const scaleX = rect.width / viewBox.vbW;
+  //   const scaleY = rect.height / viewBox.vbH;
+  //   // const px = (x - viewBox.minX) * scaleX + rect.left;
+  //   // const py = (y - viewBox.minY) * scaleY + rect.top;
+  //   // convert to local coords relative to wrapper
+  //   return { px: (x - viewBox.minX) * scaleX, py: (y - viewBox.minY) * scaleY };
+  // }
 
   return (
     <div className={containerClassName + " relative"} ref={containerRef}>

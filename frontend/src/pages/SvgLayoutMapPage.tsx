@@ -1,7 +1,7 @@
 // frontend/src/pages/SvgLayoutMapPage.tsx
 import React, { useEffect, useRef, useState } from "react";
 import MainLayout from "../layouts/MainLayout";
-import Card from "../components/ui/Card";
+import Card from "../components/ui/card";
 import { useDataStore } from "../state/useDataStore";
 
 /**
@@ -64,9 +64,9 @@ export default function SvgLayoutMapPage() {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const botsLayerRef = useRef<SVGGElement | null>(null);
   const rafRef = useRef<number | null>(null);
-  const intervalRef = useRef<number | null>(null);
 
   const storeBots = useDataStore((s: any) => s.bots) ?? null;
+
   // keep local bots, prefer store bots if available
   const [bots, setBots] = useState<BotSim[]>(() => {
     if (storeBots && storeBots.length) {
@@ -110,7 +110,15 @@ export default function SvgLayoutMapPage() {
     let w = wAttr ? parseFloat(wAttr as string) : null;
     let h = hAttr ? parseFloat(hAttr as string) : null;
 
-    const bbox = svgEl.getBBox?.();
+    let bbox: DOMRect | null = null;
+    try {
+      // getBBox can throw on some SVGs in certain environments; guard it
+      const b = (svgEl as any).getBBox?.();
+      if (b) bbox = b;
+    } catch (e) {
+      bbox = null;
+    }
+
     if ((!w || !h) && bbox) {
       w = w || bbox.width || 800;
       h = h || bbox.height || 600;
@@ -128,13 +136,13 @@ export default function SvgLayoutMapPage() {
     container.innerHTML = svgContent;
 
     // find injected svg element
-    const svgEl = container.querySelector("svg");
-    if (!svgEl) {
+    let svg = container.querySelector("svg") as SVGSVGElement | null;
+    if (!svg) {
       console.warn("Uploaded file did not contain <svg> element; using sample.");
       container.innerHTML = SAMPLE_SVG;
+      svg = container.querySelector("svg") as SVGSVGElement | null;
     }
 
-    const svg = container.querySelector("svg") as SVGSVGElement | null;
     if (!svg) return;
 
     svgRef.current = svg;
@@ -159,14 +167,16 @@ export default function SvgLayoutMapPage() {
     svg.appendChild(botsLayer);
     botsLayerRef.current = botsLayer;
 
-    // set initial bots positions (clamped to vb)
-    setBots((prev) =>
-      prev.map((b) => ({
-        ...b,
-        x: Math.max(vb!.x + 10, Math.min(vb!.x + vb!.w - 10, b.x)),
-        y: Math.max(vb!.y + 10, Math.min(vb!.y + vb!.h - 10, b.y)),
-      }))
-    );
+    // set initial bots positions (clamped to vb) — only if vb is valid
+    if (vb) {
+      setBots((prev) =>
+        prev.map((b) => ({
+          ...b,
+          x: Math.max(vb.x + 10, Math.min(vb.x + vb.w - 10, b.x)),
+          y: Math.max(vb.y + 10, Math.min(vb.y + vb.h - 10, b.y)),
+        }))
+      );
+    }
   }, [svgContent]);
 
   // draw bots (create circle + label) whenever bots or svg change
@@ -219,8 +229,11 @@ export default function SvgLayoutMapPage() {
   useEffect(() => {
     if (!isRunning || !viewBox) return;
 
-    // small helper to update one step
-    function step() {
+    // capture non-null, destructured viewBox for the closure
+    const { x: vbX, y: vbY, w: vbW, h: vbH } = viewBox;
+    const pad = 12;
+
+    const step = () => {
       setBots((prev) => {
         const next = prev.map((b) => {
           // random small delta proportional to speed
@@ -228,10 +241,11 @@ export default function SvgLayoutMapPage() {
           const dy = (Math.random() - 0.5) * 2 * b.speed * 6;
           let nx = b.x + dx;
           let ny = b.y + dy;
+
           // clamp to inside viewBox with padding
-          const pad = 12;
-          nx = Math.max(viewBox.x + pad, Math.min(viewBox.x + viewBox.w - pad, nx));
-          ny = Math.max(viewBox.y + pad, Math.min(viewBox.y + viewBox.h - pad, ny));
+          nx = Math.max(vbX + pad, Math.min(vbX + vbW - pad, nx));
+          ny = Math.max(vbY + pad, Math.min(vbY + vbH - pad, ny));
+
           return { ...b, x: nx, y: ny };
         });
 
@@ -264,7 +278,7 @@ export default function SvgLayoutMapPage() {
 
       // queue next animation frame
       rafRef.current = requestAnimationFrame(step);
-    }
+    };
 
     // start loop
     rafRef.current = requestAnimationFrame(step);
@@ -279,7 +293,6 @@ export default function SvgLayoutMapPage() {
   useEffect(() => {
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, []);
 
@@ -324,7 +337,9 @@ export default function SvgLayoutMapPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold">SVG Layout Map (Upload)</h2>
-              <div className="text-sm text-slate-500">Upload a warehouse SVG, then watch bots move around (simulated).</div>
+              <div className="text-sm text-slate-500">
+                Upload a warehouse SVG, then watch bots move around (simulated).
+              </div>
             </div>
 
             <div className="flex items-center gap-3">
@@ -333,16 +348,22 @@ export default function SvgLayoutMapPage() {
                 <div className="btn btn-ghost">Upload SVG</div>
               </label>
 
-              <button onClick={loadSample} className="btn btn-primary">Use sample SVG</button>
+              <button onClick={loadSample} className="btn btn-primary">
+                Use sample SVG
+              </button>
 
               <button
                 onClick={() => setRunning((s) => !s)}
-                className={`px-3 py-1 rounded ${isRunning ? "bg-red-500 text-white" : "bg-emerald-600 text-white"}`}
+                className={`px-3 py-1 rounded ${
+                  isRunning ? "bg-red-500 text-white" : "bg-emerald-600 text-white"
+                }`}
               >
                 {isRunning ? "Stop" : "Start"}
               </button>
 
-              <button onClick={resetBots} className="btn btn-ghost">Reset bots</button>
+              <button onClick={resetBots} className="btn btn-ghost">
+                Reset bots
+              </button>
             </div>
           </div>
         </Card>
@@ -352,7 +373,8 @@ export default function SvgLayoutMapPage() {
         </Card>
 
         <div className="text-xs text-slate-500">
-          Notes: Movement is simulated and random. SVG rendering is direct — uploaded SVG is inserted into the page (do not upload untrusted SVGs on a public server).
+          Notes: Movement is simulated and random. SVG rendering is direct — uploaded SVG is inserted into the page (do
+          not upload untrusted SVGs on a public server).
         </div>
       </div>
     </MainLayout>

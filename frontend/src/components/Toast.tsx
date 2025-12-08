@@ -1,7 +1,7 @@
 // frontend/src/components/Toast.tsx
 import React, { createContext, useContext, useState, useCallback } from "react";
 import { CheckCircle, XCircle } from "lucide-react";
-import clsx from "clsx";
+// import clsx from "clsx";
 
 type Toast = { id: string; title: string; description?: string; tone?: "info"|"success"|"error" };
 

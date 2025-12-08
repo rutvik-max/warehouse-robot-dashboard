@@ -14,7 +14,7 @@ type DataState = {
   refresh: () => Promise<void>;
 };
 
-export const useDataStore = create<DataState>((set, get) => {
+export const useDataStore = create<DataState>((set) => {
   let initialized = false;
 
   const computeAndSet = (bots: Bot[], tasks: Task[]) => {

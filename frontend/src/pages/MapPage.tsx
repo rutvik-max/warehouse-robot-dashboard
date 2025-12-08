@@ -1,7 +1,6 @@
 // frontend/src/pages/MapPage.tsx
-import React from "react";
 import MainLayout from "../layouts/MainLayout";
-import Card from "../components/ui/Card";
+import Card from "../components/ui/card";
 import SvgMapViewer from "../components/SvgMapViewer";
 
 export default function MapPage() {

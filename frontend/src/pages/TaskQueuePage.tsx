@@ -1,7 +1,7 @@
 // frontend/src/pages/TaskQueuePage.tsx
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import MainLayout from "../layouts/MainLayout";
-import Card from "../components/ui/Card";
+import Card from "../components/ui/card";
 import TaskItem from "../components/TaskItem";
 import { serverApi } from "../api/serverApi";
 import { useDataStore } from "../state/useDataStore";

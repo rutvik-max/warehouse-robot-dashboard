@@ -1,5 +1,5 @@
 // frontend/src/pages/HomeDashboard.tsx
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import MainLayout from "../layouts/MainLayout";
 import StatCard from "../components/ui/StatCard";
 import Card from "../components/ui/card";
