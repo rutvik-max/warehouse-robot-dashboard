@@ -1,5 +1,4 @@
 // frontend/src/api/serverApi.ts
-
 export type BotStatus = "idle" | "busy" | "charging" | "error";
 
 export type Bot = {
@@ -24,18 +23,26 @@ export type Task = {
   createdAt: number;
 };
 
-// Read API base from Vite env
-const API_BASE =
-  (import.meta as any).env?.VITE_API_BASE &&
-  (import.meta as any).env?.VITE_API_BASE !== "undefined"
-    ? (import.meta as any).env.VITE_API_BASE
-    : "http://localhost:4000";
+/**
+ * API base resolution:
+ * - In production with Vercel rewrite we want same-origin requests => use "/api"
+ * - For local dev you might set VITE_API_BASE (e.g. http://localhost:4000)
+ */
+const RAW_ENV = (import.meta as any).env?.VITE_API_BASE;
+const API_BASE = RAW_ENV && RAW_ENV !== "undefined" ? RAW_ENV.replace(/\/+$/, "") : "/api";
 
-console.log("[serverApi] Using API:", API_BASE);
+console.info("[serverApi] Using API base:", API_BASE);
+
+// safe join to avoid double-slashes
+function joinUrl(base: string, path: string) {
+  const b = base.replace(/\/+$/, "");
+  if (!path) return b;
+  return b + (path.startsWith("/") ? path : "/" + path);
+}
 
 // Helper to fetch JSON with better error messages
 async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const url = `${API_BASE}${path}`;
+  const url = joinUrl(API_BASE, path);
   const res = await fetch(url, init);
 
   if (!res.ok) {
@@ -43,30 +50,24 @@ async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
     try {
       body = await res.text();
     } catch {}
-
-    throw new Error(
-      `Fetch failed: ${res.status} ${res.statusText}\nURL: ${url}\n${body}`
-    );
+    throw new Error(`Fetch failed: ${res.status} ${res.statusText}\nURL: ${url}\n${body}`);
   }
 
   return res.json();
 }
 
 // ======== REST API WRAPPERS ========
-
 export const serverApi = {
   getBots: async (): Promise<Bot[]> => {
-    return fetchJson<Bot[]>("/api/bots");
+    return fetchJson<Bot[]>(" /bots".trim()); // resolves to "/api/bots"
   },
 
   getTasks: async (): Promise<Task[]> => {
-    return fetchJson<Task[]>("/api/tasks");
+    return fetchJson<Task[]>(" /tasks".trim());
   },
 
-  addTask: async (
-    task: Omit<Task, "id" | "createdAt">
-  ): Promise<Task> => {
-    return fetchJson<Task>("/api/tasks", {
+  addTask: async (task: Omit<Task, "id" | "createdAt">): Promise<Task> => {
+    return fetchJson<Task>(" /tasks".trim(), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(task),
@@ -74,10 +75,7 @@ export const serverApi = {
   },
 
   popTask: async (): Promise<Task | null> => {
-    const data = await fetchJson<{ popped?: Task | null }>(
-      "/api/tasks/pop",
-      { method: "POST" }
-    );
+    const data = await fetchJson<{ popped?: Task | null }>(" /tasks/pop".trim(), { method: "POST" });
     return data.popped ?? null;
   },
 };
